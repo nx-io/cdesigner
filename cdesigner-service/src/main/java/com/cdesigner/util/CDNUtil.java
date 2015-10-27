@@ -1,0 +1,56 @@
+package com.cdesigner.util;
+
+import java.io.InputStream;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.cdesigner.constant.GlobalProperties;
+import com.cdesigner.exception.CException;
+import com.cdesigner.util.cdn.CDN;
+import com.cdesigner.util.cdn.LocalCDN;
+import com.cdesigner.util.cdn.QiniuCDN;
+
+public final class CDNUtil {
+
+    private static final String cdn_type_qiniu = "qiniu";
+
+    private static final CDN cdn;
+
+    static {
+        if (GlobalProperties.CDN_PROVIDER.equals(cdn_type_qiniu)) {
+            cdn = new QiniuCDN();
+        } else {
+            cdn = new LocalCDN();
+        }
+    }
+
+    public static String uploadFile(final InputStream in, final String fileName) throws CException {
+        return cdn.uploadFile(in, fileName);
+    }
+
+    public static boolean deleteFile(final String path) {
+        return cdn.deleteFile(path);
+    }
+
+    public static String getFullPath(final String path) {
+        return cdn.getHttpPath(path);
+    }
+
+    public static String getThumbnail(final String path, final String width, final String height) {
+        if (StringUtils.isNotBlank(path)) {
+            StringBuilder url = new StringBuilder();
+            url.append(getFullPath(path));
+            if (StringUtils.isNotEmpty(width) || StringUtils.isNotEmpty(height)) {
+                url.append("?imageView2/1/w/").append(width).append("/h/").append(height);
+            }
+
+            return url.toString();
+        } else {
+            return null;
+        }
+    }
+
+    public static String getFileFullPath(final String path) {
+        return cdn.getFileHttpPath(path);
+    }
+}

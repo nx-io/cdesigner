@@ -1,0 +1,241 @@
+package com.cdesigner.domain;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.cdesigner.utils.Permission;
+
+/**
+ * 管理员
+ * 
+ * @author 刘飞 E-mail:liufei_it@126.com
+ *
+ * @version 1.0.0
+ * @since 2015年7月27日 下午1:31:23
+ */
+@Entity
+@Table(name = "cd_admin", catalog = "copartner")
+@NamedQueries({
+    @NamedQuery(name = "Admin.queryAdmin", query = "FROM Admin WHERE loginName = :loginName") 
+    })
+public class Admin extends BaseEntity {
+
+	private static final long serialVersionUID = 6718859190782978249L;
+
+	@Column(name = "login_name", nullable = false, unique = true)
+	private String loginName;// 姓名
+
+	@Column(name = "name")
+	private String name;
+
+	@Column(name = "password", nullable = false)
+	private String password;// 密码
+
+	@Column(name = "status", nullable = false)
+	private Byte status = 1;// 状态
+
+    @Column(name = "permission", nullable = false)
+	private Integer permission;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "last_login")
+	private Date lastLogin;// 最后登录时间
+
+	@Column(name = "last_ip", nullable = false)
+	private Long lastIp = 0L;// 最后登录时所在的ip
+	
+	public String getLastLoginString() {
+        if (lastLogin == null) {
+            return StringUtils.EMPTY;
+        }
+        return formatter.format(lastLogin);
+    }
+	
+	public boolean hasPermission(Permission permission) {
+        if (this.permission == null) {
+            return false;
+        }
+        return (this.permission >> permission.code) > 0;
+    }
+    
+    public Admin addPermission(Permission permission) {
+        if (this.permission == null) {
+            this.permission = 1;
+        }
+        this.permission <<= permission.code;
+        return this;
+    }
+    
+    public int getPermissionCode() {
+        if (hasPermission(Permission.SuperAdmin)) {
+            return 2;
+        }
+        if (hasPermission(Permission.Admin)) {
+            return 1;
+        }
+        if (hasPermission(Permission.User)) {
+            return 0;
+        }
+        return 0;
+    }
+    
+    public String getPermissionString() {
+        if (hasPermission(Permission.SuperAdmin)) {
+            return "超级管理员";
+        }
+        if (hasPermission(Permission.Admin)) {
+            return "管理员";
+        }
+        if (hasPermission(Permission.User)) {
+            return "一般用户";
+        }
+        return "无任何权限";
+    }
+    
+    public boolean isPermissionLogin() {
+        if (hasPermission(Permission.SuperAdmin)) {
+            return true;
+        }
+        if (hasPermission(Permission.Admin)) {
+            return true;
+        }
+        if (hasPermission(Permission.User)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public Admin dividePermission(Permission permission) {
+        if (this.permission == null) {
+            this.permission = 1;
+        }
+        this.permission >>= permission.code;
+        return this;
+    }
+
+	public Integer getPermission() {
+        return permission;
+    }
+
+    public void setPermission(Integer permission) {
+        this.permission = permission;
+    }
+
+    public String getLoginName() {
+		return loginName;
+	}
+
+	public void setLoginName(String loginName) {
+		this.loginName = loginName;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public Date getLastLogin() {
+		return lastLogin;
+	}
+
+	public void setLastLogin(Date lastLogin) {
+		this.lastLogin = lastLogin;
+	}
+
+	public Long getLastIp() {
+		return lastIp;
+	}
+
+	public void setLastIp(Long lastIp) {
+		this.lastIp = lastIp;
+	}
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((lastIp == null) ? 0 : lastIp.hashCode());
+        result = prime * result + ((lastLogin == null) ? 0 : lastLogin.hashCode());
+        result = prime * result + ((loginName == null) ? 0 : loginName.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((permission == null) ? 0 : permission.hashCode());
+        result = prime * result + ((status == null) ? 0 : status.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Admin other = (Admin) obj;
+        if (lastIp == null) {
+            if (other.lastIp != null)
+                return false;
+        } else if (!lastIp.equals(other.lastIp))
+            return false;
+        if (lastLogin == null) {
+            if (other.lastLogin != null)
+                return false;
+        } else if (!lastLogin.equals(other.lastLogin))
+            return false;
+        if (loginName == null) {
+            if (other.loginName != null)
+                return false;
+        } else if (!loginName.equals(other.loginName))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (password == null) {
+            if (other.password != null)
+                return false;
+        } else if (!password.equals(other.password))
+            return false;
+        if (permission == null) {
+            if (other.permission != null)
+                return false;
+        } else if (!permission.equals(other.permission))
+            return false;
+        if (status == null) {
+            if (other.status != null)
+                return false;
+        } else if (!status.equals(other.status))
+            return false;
+        return true;
+    }
+}
